@@ -18,7 +18,7 @@ const debug = async(debugmessage, debuglvl = 1) => {
 }
 
 const updatePresence = async(apiBody) => {
-	if(apiBody.online) {
+	if(apiBody?.online) {
 		const players = apiBody.players.now
 		const playersMax = apiBody.players.max
 		const playerCount = players + "/" + playersMax
@@ -266,31 +266,32 @@ const secretCmd = async (message, args) => {
 
 const sendStatusEmbed = async (apiBody, message, replace) => {
 	try {
-		const attachment = new Discord.MessageAttachment(Buffer.from(apiBody.favicon.substr("data:image/png;base64,".length), "base64"), "icon.png")
-		let playersString = ""
-		if (config.showPlayerSample) {
-			playersString = apiBody.players.sample.map(val => val.name).join(", ")
-		}
-		const embed = new Discord.MessageEmbed()
+		let embed = new Discord.MessageEmbed()
 			.setAuthor(`${config.serverAddress}:${config.serverPort}`)
-			.attachFiles(attachment).setThumbnail("attachment://icon.png")
-			.addFields({
-				name: "Motd",
-				value: apiBody.motd || "\u200b"
-			}, {
-				name: "Version",
-				value: apiBody.server.name || "\u200b",
-				inline: true
-			}, {
-				name: "Status",
-				value: `${(apiBody.online ? "Online" : "Offline")}`,
-				inline: true
-			}, {
-				name: "Players",
-				value: `${apiBody.players.now}/${apiBody.players.max} ${playersString}`
-			})
 			.setColor("#5b8731")
 			.setFooter("Minecraft Server Status Bot for Discord")
+		
+		embed = embed.addFields({
+			name: "Motd",
+			value: apiBody?.motd || "\u200b"
+		}, {
+			name: "Version",
+			value: apiBody?.server?.name || "\u200b",
+			inline: true
+		}, {
+			name: "Status",
+			value: apiBody?.online ? "Online" : "Offline",
+			inline: true
+		}, {
+			name: "Players",
+			value: apiBody ? `${apiBody.players.now}/${apiBody.players.max} ${apiBody.players.sample.map(val => val.name).join(", ")}` : "0/0"
+		})
+			
+		if (apiBody?.favicon) {
+			const attachment = new Discord.MessageAttachment(Buffer.from(apiBody.favicon.substr("data:image/png;base64,".length), "base64"), "icon.png")
+			embed = embed.attachFiles(attachment).setThumbnail("attachment://icon.png")
+		}
+		
 		if (replace)
 			return await message.edit(`Status for **${config.serverAddress}:${config.serverPort}**:`, {embed})
 		else 
@@ -323,11 +324,16 @@ const pinCmd = async (message) => {
 const onlineCmd = async(message) => {
 	try {
 		const apiBody = await fetchMCStatus(message, config.serverAddress, config.serverPort)
-		let playersString = ""
-		if (config.showPlayerSample) {
-			playersString = apiBody.players.sample.map(val => val.name).join(", ")
+		if (apiBody) {
+			let playersString = ""
+			if (config.showPlayerSample) {
+				playersString = apiBody.players.sample.map(val => val.name).join(", ")
+			}
+			await message.channel.send(`Online: ${apiBody.players.now}/${apiBody.players.max} ${playersString}`)
 		}
-		await message.channel.send(`Online: ${apiBody.players.now}/${apiBody.players.max} ${playersString}`)
+		else {
+			await message.channel.send("Offline")
+		}
 	}
 	catch(err) {
 		console.error("online cmd failed", err)
@@ -338,11 +344,6 @@ const fetchMCStatus = async(message, serverAddress, serverPort) => {
 	try {
 		const pingRes = await ping.promise.probe(serverAddress, {timeout: 5})
 		if (!pingRes.alive) {
-			if (message) {
-				await message.delete()
-				const msg = await message.channel.send(`Looks like ${serverAddress} is not reachable... Please verify it's online and not being blocked!`)
-				await msg.delete({timeout: 3000})
-			}
 			return
 		}
 

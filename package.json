@@ -2,7 +2,7 @@
   "name": "minecraft-server-status-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "mc-status-bot.js",
   "dependencies": {
     "discord.js": "^12.5.3",
     "ms": "^2.1.3",
