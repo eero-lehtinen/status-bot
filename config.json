@@ -1,15 +1,15 @@
 {
-	"token": "ODMzMzMyNjcyMzYwMzQ5Nzc3.YHwzhw.3_HsqeGk2999Bg0cAI1QiGeLlM8",
-	"prefix": "mc!",
-	"serverAddress": "mc.eerolehtinen.fi",
-	"serverPort": "25565",
-	"serverName": "1.12.2",
-	"updateInterval": "1min",
-	"showPlayerSample": true,
-	"debugMode": true,
-	"debugLvl": 1,
-	"pinUpdate": true,
-	"pinId": "833490805243117580",
-	"pinGuildId": "165427187367804928",
-	"pinChanId": "165427187367804928"
+  "token": "ODMzMzMyNjcyMzYwMzQ5Nzc3.YHwzhw.3_HsqeGk2999Bg0cAI1QiGeLlM8",
+  "prefix": "mc!",
+  "serverAddress": "mc.eerolehtinen.fi",
+  "serverPort": "25565",
+  "serverName": "1.12.2",
+  "updateInterval": "1min",
+  "showPlayerSample": true,
+  "debugMode": true,
+  "debugLvl": 1,
+  "pinUpdate": true,
+  "pinId": "835560540444164156",
+  "pinGuildId": "165427187367804928",
+  "pinChanId": "165427187367804928"
 }
