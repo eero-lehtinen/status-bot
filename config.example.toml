@@ -1,0 +1,6 @@
+game = "minecraft"
+gameHost = "mc.eerolehtinen.fi"
+gamePort = ""
+showPlayerNames = true
+logging = false
+pinUpdateInterval = "2min"
