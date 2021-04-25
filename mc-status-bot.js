@@ -160,7 +160,7 @@ const forceUpdateCmd = async(message) => {
 		
 		let msg = await message.channel.send("Updating the channels, please wait...")
 		await updateStatus()
-		msg = msg.edit("Channels were updated successfully!")
+		msg = await msg.edit("Channels were updated successfully!")
 		await msg.delete({timeout: 1000})
 	}
 	catch(err) {
@@ -338,7 +338,7 @@ const onlineCmd = async(message) => {
 const fetchMCStatus = async(serverAddress, serverPort) => {
 	let res
 	try {
-		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: 3})
+		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: 500})
 		if (!res.samplePlayers) {
 			res.samplePlayers = []
 		}
