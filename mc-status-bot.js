@@ -20,9 +20,7 @@ const debug = async(debugmessage, debuglvl = 1) => {
 
 const updatePresence = async(status) => {
 	if(status) {
-		const players = status.onlinePlayers
-		const playersMax = status.maxPlayers
-		const playerCount = players + "/" + playersMax
+		const playerCount = status.onlinePlayers + "/" + status.maxPlayers
 		const statusTitle = (playerCount.length <= 10 ? "Minecraft" : "MC")
 		await client.user.setPresence({
 			activity: {
@@ -128,14 +126,13 @@ client.on("message", async(message) => {
 
 const helpCmd = async(message) => {
 	try {
-		var commandList = 
-		`\`${config.prefix}ip\`\n
-		\`${config.prefix}status|stat\`\n
-		\`${config.prefix}online|on\`\n
-		\`${config.prefix}force-update|fu\`\n
-		\`${config.prefix}set <address|port|name|prefix|pinUpdate|showPlayerSample> [value]\`\n
-		\`${config.prefix}pin\``
-		await message.reply(`bot commands:\n${commandList}`)
+		await message.reply(`bot commands:\n
+			\`${config.prefix}ip\`\n
+			\`${config.prefix}status|stat\`\n
+			\`${config.prefix}online|on\`\n
+			\`${config.prefix}force-update|fu\`\n
+			\`${config.prefix}set <address|port|name|prefix|pinUpdate|showPlayerSample> [value]\`\n
+			\`${config.prefix}pin\``)
 	}
 	catch(err) {
 		console.error("help command failed", err)
