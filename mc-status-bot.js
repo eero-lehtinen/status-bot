@@ -3,6 +3,8 @@ const Discord = require("discord.js")
 const fs = require("fs")
 const mcUtil = require("minecraft-server-util")
 
+const STATUS_TIMEOUT = 10
+
 const client = new Discord.Client()
 const configFile = "./config.json"
 const config = require(configFile)
@@ -338,7 +340,7 @@ const onlineCmd = async(message) => {
 const fetchMCStatus = async(serverAddress, serverPort) => {
 	let res
 	try {
-		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: 500})
+		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: STATUS_TIMEOUT})
 		if (!res.samplePlayers) {
 			res.samplePlayers = []
 		}
