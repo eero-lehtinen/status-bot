@@ -7,7 +7,7 @@
   "updateInterval": "1min",
   "showPlayerSample": true,
   "debugMode": true,
-  "debugLvl": 1,
+  "debugLvl": 2,
   "pinUpdate": true,
   "pinId": "835560540444164156",
   "pinGuildId": "165427187367804928",

@@ -1,8 +1,7 @@
 const ms = require("ms")
-const fetch = require("node-fetch")
 const Discord = require("discord.js")
 const fs = require("fs")
-const ping = require("ping")
+const mcUtil = require("minecraft-server-util")
 
 const client = new Discord.Client()
 const configFile = "./config.json"
@@ -17,10 +16,10 @@ const debug = async(debugmessage, debuglvl = 1) => {
 	}
 }
 
-const updatePresence = async(apiBody) => {
-	if(apiBody?.online) {
-		const players = apiBody.players.now
-		const playersMax = apiBody.players.max
+const updatePresence = async(status) => {
+	if(status) {
+		const players = status.onlinePlayers
+		const playersMax = status.maxPlayers
 		const playerCount = players + "/" + playersMax
 		const statusTitle = (playerCount.length <= 10 ? "Minecraft" : "MC")
 		await client.user.setPresence({
@@ -42,15 +41,15 @@ const updatePresence = async(apiBody) => {
 
 const updateStatus = async() => {
 	debug("Updating bot status")
-	const apiBody = await fetchMCStatus(undefined, config.serverAddress, config.serverPort)
-	await updatePresence(apiBody)
+	const status = await fetchMCStatus(config.serverAddress, config.serverPort)
+	await updatePresence(status)
 	if(config.pinUpdate) {
-		await updatePin(apiBody)
+		await updatePin(status)
 	}
-	debug(`Minecraft server online: ${apiBody.online}`, 1)
+	debug(`Minecraft server online: ${!!status}`, 1)
 }
 
-const updatePin = async(apiBody) => {
+const updatePin = async(status) => {
 	try {
 		const guild = client.guilds.cache.get(config.pinGuildId)
 		if(!guild) {
@@ -69,7 +68,7 @@ const updatePin = async(apiBody) => {
 			return
 		}
 
-		await sendStatusEmbed(apiBody, message, true)
+		await sendStatusEmbed(status, message, true)
 		debug("Updated pin.")
 	}
 	catch(err) {
@@ -105,26 +104,23 @@ client.on("message", async(message) => {
 	if(command === "help") {
 		helpCmd(message)
 	}
-	if(command === "ip") {
+	else if(command === "ip") {
 		ipCmd(message)
 	}
-	if(command === "force-update" || command === "fu") {
+	else if(command === "force-update" || command === "fu") {
 		forceUpdateCmd(message)
 	}
-	if(command === "status" || command === "stat") {
+	else if(command === "status" || command === "stat") {
 		statusCmd(message)
 	}
-	if(command === "online" || command === "on") {
+	else if(command === "online" || command === "on") {
 		onlineCmd(message)
 	}
-	if(command === "pin" && config.pinUpdate) {
+	else if(command === "pin" && config.pinUpdate) {
 		pinCmd(message)
 	}
-	if(command === "set") {
+	else if(command === "set") {
 		setCmd(message, args)
-	}
-	if(command === "supersecretcommandtemplate") {
-		secretCmd(message, args)
 	}
 })
 
@@ -254,42 +250,41 @@ const setCmd = async(message, args) => {
 	}
 }
 
-
-const secretCmd = async (message, args) => {
-	let helpPage = args[0] || "1" //take the page from the msg if supplied, otherwise default to page 1
-	if(helpPage === "1") {
-		await message.channel.send("Super secret commandd template page 1!")
-	} else if(helpPage === "2") {
-		await message.channel.send("Super secret commandd template page 2!")
-	}
-}
-
-const sendStatusEmbed = async (apiBody, message, replace) => {
+const sendStatusEmbed = async (status, message, replace) => {
 	try {
 		let embed = new Discord.MessageEmbed()
 			.setAuthor(`${config.serverAddress}:${config.serverPort}`)
 			.setColor("#5b8731")
 			.setFooter("Minecraft Server Status Bot for Discord")
+			.setThumbnail("attachment://icon.png")
 		
+		if (status) {
+			embed = embed.addFields({
+				name: "Motd",
+				value: status.description?.descriptionText || "\u200b"
+			}, {
+				name: "Version",
+				value: status.version || "\u200b",
+				inline: true
+			})
+		}
+
 		embed = embed.addFields({
-			name: "Motd",
-			value: apiBody?.motd || "\u200b"
-		}, {
-			name: "Version",
-			value: apiBody?.server?.name || "\u200b",
-			inline: true
-		}, {
 			name: "Status",
-			value: apiBody?.online ? "Online" : "Offline",
+			value: status ? "Online" : "Offline",
 			inline: true
-		}, {
-			name: "Players",
-			value: apiBody ? `${apiBody.players.now}/${apiBody.players.max} ${apiBody.players.sample.map(val => val.name).join(", ")}` : "0/0"
 		})
+
+		if (status) {
+			embed = embed.addFields({
+				name: "Players",
+				value: `${status.onlinePlayers}/${status.maxPlayers} ${status.samplePlayers.map(val => val.name).join(", ")}`
+			})
+		}
 			
-		if (apiBody?.favicon) {
-			const attachment = new Discord.MessageAttachment(Buffer.from(apiBody.favicon.substr("data:image/png;base64,".length), "base64"), "icon.png")
-			embed = embed.attachFiles(attachment).setThumbnail("attachment://icon.png")
+		if (status?.favicon) {
+			const attachment = new Discord.MessageAttachment(Buffer.from(status.favicon.substr("data:image/png;base64,".length), "base64"), "icon.png")
+			embed = embed.attachFiles(attachment)
 		}
 		
 		if (replace)
@@ -305,8 +300,8 @@ const sendStatusEmbed = async (apiBody, message, replace) => {
 
 const pinCmd = async (message) => {
 	try {
-		const apiBody = await fetchMCStatus(message, config.serverAddress, config.serverPort)
-		let msg = await sendStatusEmbed(apiBody, message, false)
+		const status = await fetchMCStatus(message, config.serverAddress, config.serverPort)
+		let msg = await sendStatusEmbed(status, message, false)
 		msg = await msg.pin()
 		debug("Guild ID set: " + msg.guild.id, 2)
 		debug("Channel ID set: " + msg.channel.id, 2)
@@ -323,13 +318,13 @@ const pinCmd = async (message) => {
 
 const onlineCmd = async(message) => {
 	try {
-		const apiBody = await fetchMCStatus(message, config.serverAddress, config.serverPort)
-		if (apiBody) {
+		const status = await fetchMCStatus(config.serverAddress, config.serverPort)
+		if (status) {
 			let playersString = ""
 			if (config.showPlayerSample) {
-				playersString = apiBody.players.sample.map(val => val.name).join(", ")
+				playersString = status.samplePlayers.map(val => val.name).join(", ")
 			}
-			await message.channel.send(`Online: ${apiBody.players.now}/${apiBody.players.max} ${playersString}`)
+			await message.channel.send(`Online: ${status.onlinePlayers}/${status.maxPlayers} ${playersString}`)
 		}
 		else {
 			await message.channel.send("Offline")
@@ -340,45 +335,26 @@ const onlineCmd = async(message) => {
 	}
 }
 
-const fetchMCStatus = async(message, serverAddress, serverPort) => {
+const fetchMCStatus = async(serverAddress, serverPort) => {
+	let res
 	try {
-		const pingRes = await ping.promise.probe(serverAddress, {timeout: 5})
-		if (!pingRes.alive) {
-			return
+		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: 2000})
+		if (!res.samplePlayers) {
+			res.samplePlayers = []
 		}
-
-		const mcRes = await fetch(`https://mcapi.us/server/status?ip=${serverAddress}&port=${serverPort}`)
-		if(!mcRes) {
-			if (message) {
-				await message.delete()
-				const msg = await message.channel.send("Looks like mcapi.us is not reachable... Please verify it's online and not being blocked!")
-				await msg.delete({timeout: 3000})
-			}
-			return
-		}	
-
-		const body = await mcRes.json()
-		if(body.status != "success") {
-			if (message) {
-				await message.delete()
-				const msg = await message.channel.send("Looks like the server is not reachable... Please verify it's online and not blocking access!")
-				await msg.delete({timeout: 3000})
-			}
-			return
-		}
-
-		debug(body, 2)
-		return body
 	}
 	catch(err) {
-		console.error("mc status fetch failed", err)
+		res = undefined
 	}
+
+	debug(res, 2)
+	return res
 }
 
 const statusCmd = async(message) => {
 	try {
-		const apiBody = await fetchMCStatus(message, config.serverAddress, config.serverPort)
-		await sendStatusEmbed(apiBody, message, false)
+		const status = await fetchMCStatus(config.serverAddress, config.serverPort)
+		await sendStatusEmbed(status, message, false)
 	}
 	catch(err) {
 		console.error("status cmd failed", err)
