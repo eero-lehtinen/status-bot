@@ -338,7 +338,7 @@ const onlineCmd = async(message) => {
 const fetchMCStatus = async(serverAddress, serverPort) => {
 	let res
 	try {
-		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: 2000})
+		res = await mcUtil.status(serverAddress, {port: Number(serverPort), timeout: 3})
 		if (!res.samplePlayers) {
 			res.samplePlayers = []
 		}
