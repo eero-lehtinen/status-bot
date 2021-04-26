@@ -98,7 +98,7 @@ client.on("message", async(message) => {
 	if(!message.content.startsWith(config.prefix))
 		return
 
-	let args = message.content.replace(config.prefix, "").split(" ")
+	let args = message.content.replace(config.prefix, "").trim().split(" ")
 	let command = args.shift()
 
 	if(command === "help") {
@@ -127,12 +127,12 @@ client.on("message", async(message) => {
 const helpCmd = async(message) => {
 	try {
 		await message.reply(`bot commands:\n
-			\`${config.prefix}ip\`\n
-			\`${config.prefix}status|stat\`\n
-			\`${config.prefix}online|on\`\n
-			\`${config.prefix}force-update|fu\`\n
-			\`${config.prefix}set <address|port|name|prefix|pinUpdate|showPlayerSample> [value]\`\n
-			\`${config.prefix}pin\``)
+			\`${config.prefix} ip\`\n
+			\`${config.prefix} status|stat\`\n
+			\`${config.prefix} online|on\`\n
+			\`${config.prefix} force-update|fu\`\n
+			\`${config.prefix} set <address|port|name|prefix|pinUpdate|showPlayerSample> [value]\`\n
+			\`${config.prefix} pin\``)
 	}
 	catch(err) {
 		console.error("help command failed", err)
