@@ -12,73 +12,77 @@ const debugMode = config.debugMode
 const debugLvl = config.debugLvl
 const updateInterval = config.updateInterval
 
-const debug = async(debugmessage, debuglvl = 1) => {
-	if(debugMode && (debugLvl >= debuglvl)) {
+const debug = async (debugmessage, debuglvl = 1) => {
+	if (debugMode && debugLvl >= debuglvl) {
 		console.log(debugmessage)
 	}
 }
 
-const updatePresence = async(status) => {
-	if(status) {
+const updatePresence = async status => {
+	if (status) {
 		const playerCount = status.onlinePlayers + "/" + status.maxPlayers
-		const statusTitle = (playerCount.length <= 10 ? "Minecraft" : "MC")
+		const statusTitle = playerCount.length <= 10 ? "Minecraft" : "MC"
 		await client.user.setPresence({
 			activity: {
-				name: statusTitle + " | " + playerCount
+				name: statusTitle + " | " + playerCount,
 			},
-			status: "online"
+			status: "online",
 		})
-	} 
-	else {
+	} else {
 		await client.user.setPresence({
 			activity: {
-				name: "Minecraft | Offline"
+				name: "Minecraft | Offline",
 			},
-			status: "idle"
+			status: "idle",
 		})
 	}
 }
 
-const updateStatus = async() => {
+const updateStatus = async () => {
 	debug("Updating bot status")
 	const status = await fetchMCStatus(config.serverAddress, config.serverPort)
 	await updatePresence(status)
-	if(config.pinUpdate) {
+	if (config.pinUpdate) {
 		await updatePin(status)
 	}
 	debug(`Minecraft server online: ${!!status}`, 1)
 }
 
-const updatePin = async(status) => {
+const updatePin = async status => {
 	try {
 		const guild = client.guilds.cache.get(config.pinGuildId)
-		if(!guild) {
-			debug(`Unable to find guild. Most likely you haven't set a pin. Use ${config.prefix}pin to set one. Or set updatePin to false in your config.`)
+		if (!guild) {
+			debug(
+				`Unable to find guild. Most likely you haven't set a pin. Use ${config.prefix}pin to set one. Or set updatePin to false in your config.`
+			)
 			return
 		}
-		const channel = guild.channels.cache.find(c => c.id === config.pinChanId && c.type === "text")
-		if(!channel) {
-			debug(`Unable to find channel. Most likely you haven't set a pin. Use ${config.prefix}pin to set one. Or set updatePin to false in your config.`)
+		const channel = guild.channels.cache.find(
+			c => c.id === config.pinChanId && c.type === "text"
+		)
+		if (!channel) {
+			debug(
+				`Unable to find channel. Most likely you haven't set a pin. Use ${config.prefix}pin to set one. Or set updatePin to false in your config.`
+			)
 			return
 		}
 
 		const message = await channel.messages.fetch(config.pinId)
-		if(!message) {
+		if (!message) {
 			debug("Unable to find pinned message.")
 			return
 		}
 
 		await sendStatusEmbed(status, message, true)
 		debug("Updated pin.")
-	}
-	catch(err) {
+	} catch (err) {
 		console.error("pin update failed", err)
 	}
 }
 
-const updateConfigFile = async() => {
+const updateConfigFile = async () => {
 	fs.writeFile(configFile, JSON.stringify(config, null, 2), function writeJSON(err) {
-		if(err) {
+		if (err) {
 			debug(err)
 			return
 		}
@@ -91,92 +95,86 @@ const updateConfigFile = async() => {
 client.on("ready", () => {
 	console.log(`Ready. Logged as ${client.user.tag}.`)
 	updateStatus()
-	setInterval(() => {updateStatus()}, ms(updateInterval))
+	setInterval(() => {
+		updateStatus()
+	}, ms(updateInterval))
 })
 
-client.on("message", async(message) => {
-	if(!message.content.startsWith(config.prefix))
-		return
+client.on("message", async message => {
+	if (!message.content.startsWith(config.prefix)) return
 
 	let args = message.content.replace(config.prefix, "").trim().split(" ")
 	let command = args.shift()
 
-	if(command === "help") {
+	if (command === "help") {
 		helpCmd(message)
-	}
-	else if(command === "ip") {
+	} else if (command === "ip") {
 		ipCmd(message)
-	}
-	else if(command === "force-update" || command === "fu") {
+	} else if (command === "force-update" || command === "fu") {
 		forceUpdateCmd(message)
-	}
-	else if(command === "status" || command === "stat") {
+	} else if (command === "status" || command === "stat") {
 		statusCmd(message)
-	}
-	else if(command === "online" || command === "on") {
+	} else if (command === "online" || command === "on") {
 		onlineCmd(message)
-	}
-	else if(command === "pin" && config.pinUpdate) {
+	} else if (command === "pin" && config.pinUpdate) {
 		pinCmd(message)
-	}
-	else if(command === "set") {
+	} else if (command === "set") {
 		setCmd(message, args)
 	}
 })
 
-const helpCmd = async(message) => {
+const helpCmd = async message => {
 	try {
 		await message.reply(
-			"bot commands:\n"+
-			`\`${config.prefix} ip\`\n` +
-			`\`${config.prefix} status|stat\`\n` +
-			`\`${config.prefix} online|on\`\n` +
-			`\`${config.prefix} force-update|fu\`\n` +
-			`\`${config.prefix} set <address|port|name|prefix|pinUpdate|showPlayerSample> [value]\`\n` +
-			`\`${config.prefix} pin\``)
-	}
-	catch(err) {
+			"bot commands:\n" +
+				`\`${config.prefix} ip\`\n` +
+				`\`${config.prefix} status|stat\`\n` +
+				`\`${config.prefix} online|on\`\n` +
+				`\`${config.prefix} force-update|fu\`\n` +
+				`\`${config.prefix} set <address|port|name|prefix|pinUpdate|showPlayerSample> [value]\`\n` +
+				`\`${config.prefix} pin\``
+		)
+	} catch (err) {
 		console.error("help command failed", err)
 	}
 }
 
-const ipCmd = async(message) => {
+const ipCmd = async message => {
 	try {
-		await message.reply(`mc server address:\n${config.serverAddress}:${config.serverPort || ""}`)
-	}
-	catch (err) {
+		await message.reply(
+			`mc server address:\n${config.serverAddress}:${config.serverPort || ""}`
+		)
+	} catch (err) {
 		console.error("ip command failed", err)
 	}
 }
 
-const forceUpdateCmd = async(message) => {
+const forceUpdateCmd = async message => {
 	try {
 		await message.delete()
-		if(!message.member.hasPermission("MANAGE_MESSAGES")) {
+		if (!message.member.hasPermission("MANAGE_MESSAGES")) {
 			const msg = await message.channel.send("Only server moderators can run this command!")
-			await msg.delete({timeout: 3000})
+			await msg.delete({ timeout: 3000 })
 			return
 		}
-		
+
 		let msg = await message.channel.send("Updating the channels, please wait...")
 		await updateStatus()
 		msg = await msg.edit("Channels were updated successfully!")
-		await msg.delete({timeout: 1000})
-	}
-	catch(err) {
+		await msg.delete({ timeout: 1000 })
+	} catch (err) {
 		console.error("force update cmd failed", err)
 	}
 }
 
-const setConfigValue = async(message, name, key, value) => {
+const setConfigValue = async (message, name, key, value) => {
 	try {
 		let msg = await message.channel.send("Setting " + name)
 		config[key] = value
 		updateConfigFile()
 		msg = await msg.edit(`${name} set to ${config[key]}`)
-		msg.delete({timeout: 3000})
-	}
-	catch(err) {
+		msg.delete({ timeout: 3000 })
+	} catch (err) {
 		console.error("set config value failed", err)
 	}
 }
@@ -188,30 +186,30 @@ const setCmdValidArgs = {
 	},
 	port: {
 		name: "Port",
-		key: "serverPort"
+		key: "serverPort",
 	},
 	name: {
 		name: "Server name",
-		key: "serverName"
+		key: "serverName",
 	},
 	prefix: {
 		name: "Command prefix",
-		key: "prefix"
+		key: "prefix",
 	},
 	pinupdate: {
 		name: "Pin update",
-		key: "pinUpdate"
+		key: "pinUpdate",
 	},
 	showplayersample: {
 		name: "Show player sample",
 		key: "showPlayerSample",
-		isBoolean: true
-	}
+		isBoolean: true,
+	},
 }
 
-const setCmd = async(message, args) => {
-	try{
-		if(!message.member.hasPermission("MANAGE_MESSAGES")) {
+const setCmd = async (message, args) => {
+	try {
+		if (!message.member.hasPermission("MANAGE_MESSAGES")) {
 			await message.channel.send("Only server moderators can run this command!")
 		}
 
@@ -219,7 +217,7 @@ const setCmd = async(message, args) => {
 
 		if (!(arg in setCmdValidArgs)) {
 			const msg = await message.channel.send("No arguments set!")
-			await msg.delete({timeout: 3000})
+			await msg.delete({ timeout: 3000 })
 			return
 		}
 
@@ -228,8 +226,10 @@ const setCmd = async(message, args) => {
 		let value = args[1]
 
 		if (!value) {
-			const msg = await message.channel.send(`No ${name} specified. Current value is: "${config[key]}"`)
-			await msg.delete({timeout: 3000})
+			const msg = await message.channel.send(
+				`No ${name} specified. Current value is: "${config[key]}"`
+			)
+			await msg.delete({ timeout: 3000 })
 			return
 		}
 
@@ -237,15 +237,16 @@ const setCmd = async(message, args) => {
 			if (value === "true") value = true
 			else if (value === "false") value = false
 			else {
-				const msg = await message.channel.send("Argument type is wrong (true or false required)")
-				await msg.delete({timeout: 3000})
+				const msg = await message.channel.send(
+					"Argument type is wrong (true or false required)"
+				)
+				await msg.delete({ timeout: 3000 })
 				return
 			}
 		}
 
 		setConfigValue(message, name, key, value)
-	}
-	catch (err) {
+	} catch (err) {
 		console.error("set cmd failed", err)
 	}
 }
@@ -257,48 +258,60 @@ const sendStatusEmbed = async (status, message, replace) => {
 			.setColor("#5b8731")
 			.setFooter("Minecraft Server Status Bot for Discord")
 			.setThumbnail("attachment://icon.png")
-		
+
 		if (status) {
-			embed = embed.addFields({
-				name: "Motd",
-				value: status.description?.descriptionText || "\u200b"
-			}, {
-				name: "Version",
-				value: status.version || "\u200b",
-				inline: true
-			})
+			embed = embed.addFields(
+				{
+					name: "Motd",
+					value: status.description?.descriptionText || "\u200b",
+				},
+				{
+					name: "Version",
+					value: status.version || "\u200b",
+					inline: true,
+				}
+			)
 		}
 
 		embed = embed.addFields({
 			name: "Status",
 			value: status ? "Online" : "Offline",
-			inline: true
+			inline: true,
 		})
 
 		if (status) {
 			embed = embed.addFields({
 				name: "Players",
-				value: `${status.onlinePlayers}/${status.maxPlayers} ${status.samplePlayers.map(val => val.name).join(", ")}`
+				value: `${status.onlinePlayers}/${status.maxPlayers} ${status.samplePlayers
+					.map(val => val.name)
+					.join(", ")}`,
 			})
 		}
-			
+
 		if (status?.favicon) {
-			const attachment = new Discord.MessageAttachment(Buffer.from(status.favicon.substr("data:image/png;base64,".length), "base64"), "icon.png")
+			const attachment = new Discord.MessageAttachment(
+				Buffer.from(status.favicon.substr("data:image/png;base64,".length), "base64"),
+				"icon.png"
+			)
 			embed = embed.attachFiles(attachment)
 		}
-		
+
 		if (replace)
-			return await message.edit(`Status for **${config.serverAddress}:${config.serverPort}**:`, {embed})
-		else 
-			return await message.channel.send(`Status for **${config.serverAddress}:${config.serverPort}**:`, {embed})
-	}
-	catch(err) {
+			return await message.edit(
+				`Status for **${config.serverAddress}:${config.serverPort}**:`,
+				{ embed }
+			)
+		else
+			return await message.channel.send(
+				`Status for **${config.serverAddress}:${config.serverPort}**:`,
+				{ embed }
+			)
+	} catch (err) {
 		console.error("status embed send failed", err)
 	}
-
 }
 
-const pinCmd = async (message) => {
+const pinCmd = async message => {
 	try {
 		const status = await fetchMCStatus(message, config.serverAddress, config.serverPort)
 		let msg = await sendStatusEmbed(status, message, false)
@@ -310,13 +323,12 @@ const pinCmd = async (message) => {
 		config.pinChanId = message.channel.id
 		config.pinId = msg.id
 		updateConfigFile()
-	}
-	catch(err) {
+	} catch (err) {
 		console.error("pin cmd failed", err)
 	}
-} 
+}
 
-const onlineCmd = async(message) => {
+const onlineCmd = async message => {
 	try {
 		const status = await fetchMCStatus(config.serverAddress, config.serverPort)
 		if (status) {
@@ -324,13 +336,13 @@ const onlineCmd = async(message) => {
 			if (config.showPlayerSample) {
 				playersString = status.samplePlayers.map(val => val.name).join(", ")
 			}
-			await message.channel.send(`Online: ${status.onlinePlayers}/${status.maxPlayers} ${playersString}`)
-		}
-		else {
+			await message.channel.send(
+				`Online: ${status.onlinePlayers}/${status.maxPlayers} ${playersString}`
+			)
+		} else {
 			await message.channel.send("Offline")
 		}
-	}
-	catch(err) {
+	} catch (err) {
 		console.error("online cmd failed", err)
 	}
 }
@@ -339,20 +351,22 @@ const timeout = (prom, time) => {
 	let timer
 	return Promise.race([
 		prom,
-		new Promise((_r, rej) => timer = setTimeout(rej, time))
+		new Promise((_r, rej) => (timer = setTimeout(rej, time))),
 	]).finally(() => clearTimeout(timer))
 }
 
-const fetchMCStatus = async(serverAddress, serverPort) => {
+const fetchMCStatus = async (serverAddress, serverPort) => {
 	let res
 	try {
-		res = await timeout(mcUtil.status(serverAddress, {port: Number(serverPort)}), STATUS_TIMEOUT)
-		
+		res = await timeout(
+			mcUtil.status(serverAddress, { port: Number(serverPort) }),
+			STATUS_TIMEOUT
+		)
+
 		if (!res.samplePlayers) {
 			res.samplePlayers = []
 		}
-	}
-	catch(err) {
+	} catch (err) {
 		res = undefined
 	}
 
@@ -360,16 +374,13 @@ const fetchMCStatus = async(serverAddress, serverPort) => {
 	return res
 }
 
-const statusCmd = async(message) => {
+const statusCmd = async message => {
 	try {
 		const status = await fetchMCStatus(config.serverAddress, config.serverPort)
 		await sendStatusEmbed(status, message, false)
-	}
-	catch(err) {
+	} catch (err) {
 		console.error("status cmd failed", err)
 	}
 }
 
 client.login(config.token)
-
-
