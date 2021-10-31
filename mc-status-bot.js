@@ -142,7 +142,7 @@ const helpCmd = async(message) => {
 
 const ipCmd = async(message) => {
 	try {
-		await message.reply(`mc server address:\n${config.serverAddress}${config.serverPort ? config.serverPort : ""}`)
+		await message.reply(`mc server address:\n${config.serverAddress}:${config.serverPort || ""}`)
 	}
 	catch (err) {
 		console.error("ip command failed", err)
