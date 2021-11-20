@@ -1,5 +1,4 @@
 import { z } from "zod"
-import toml from "@iarna/toml"
 import fs from "fs/promises"
 
 const configPath = "./config.json"
