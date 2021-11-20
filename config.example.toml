@@ -5,3 +5,4 @@ showMapField = false
 showPlayerNames = true
 logging = false
 pinUpdateInterval = "2min"
+timeZone = "+02:00"

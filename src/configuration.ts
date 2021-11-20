@@ -15,6 +15,7 @@ const zConfig = z
 		showPlayerNames: z.boolean(),
 		logging: z.boolean(),
 		pinUpdateInterval: z.string(),
+		timeZone: z.string(),
 	})
 	.strict()
 

@@ -8,6 +8,7 @@ import {
 	CommandInteraction,
 	GuildMember,
 } from "discord.js"
+import { format } from "date-fns-tz"
 import createLogFunc from "./log"
 import { loadConfig, loadPinData, savePinData } from "./configuration"
 import { fetchStatus, Status } from "./fetchStatus"
@@ -148,7 +149,11 @@ void (async () => {
 		let embed = new MessageEmbed()
 			.setAuthor(gameDisplayName)
 			.setColor(status.online ? "BLUE" : "RED")
-			.setFooter(`Last update: ${new Date().toISOString().replace("T", " ").substr(0, 19)} GMT`)
+			.setFooter(
+				`Last update: ${format(new Date(), "yyyy-MM-dd HH:mm:ss xxx", {
+					timeZone: config.timeZone,
+				})}`
+			)
 
 		embed = embed.addFields({
 			name: "Status",
