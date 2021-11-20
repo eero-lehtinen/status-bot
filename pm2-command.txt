@@ -1,0 +1,4 @@
+pm2 start ./out/index.js --name "x-server-status" \
+	--interpreter="node path" \
+	--node-args="-r dotenv-safe/config" \
+	--watch --time 
