@@ -1,6 +1,7 @@
 game = "minecraft"
 gameHost = "mc.eerolehtinen.fi"
 gamePort = ""
+showMapField = false
 showPlayerNames = true
 logging = false
 pinUpdateInterval = "2min"

@@ -11,6 +11,7 @@ const zConfig = z
 		game: z.string(),
 		gameHost: z.string(),
 		gamePort: z.string(),
+		showMapField: z.boolean(),
 		showPlayerNames: z.boolean(),
 		logging: z.boolean(),
 		pinUpdateInterval: z.string(),

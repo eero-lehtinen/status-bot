@@ -148,7 +148,7 @@ void (async () => {
 		let embed = new MessageEmbed()
 			.setAuthor(gameDisplayName)
 			.setColor(status.online ? "BLUE" : "RED")
-		//.setFooter("")
+			.setFooter(`Last update: ${new Date().toISOString()}`)
 
 		embed = embed.addFields({
 			name: "Status",
@@ -173,7 +173,7 @@ void (async () => {
 				}
 			)
 
-			if (status.info.map) {
+			if (config.showMapField && status.info.map) {
 				embed = embed.addFields({
 					name: "Map",
 					value: status.info.map || "\u200b",
