@@ -1,7 +1,6 @@
 import { z } from "zod"
 import toml from "@iarna/toml"
 import fs from "fs/promises"
-import { config } from "dotenv"
 
 const configPath = "./config.toml"
 const pinDataPath = "./pinData.json"
