@@ -7,7 +7,7 @@ module.exports = {
 	apps: config.gameConfigs.map(obj => ({
 		name: `${obj.game}-status-bot`,
 		script: "./out/index.js",
-		args: obj.name,
+		args: obj.game,
 		restart_delay: "3000",
 		watch: ["out"],
 		log_date_format: "YYYY-MM-DD HH:mm Z",
