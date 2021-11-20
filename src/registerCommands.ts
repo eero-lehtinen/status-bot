@@ -4,15 +4,15 @@ import { Routes } from "discord-api-types/v9"
 export const commands = [
 	{
 		name: "ip",
-		description: "Get current ip",
+		description: "Show game server ip",
 	},
 	{
 		name: "force-update",
-		description: "Force-update currently pinned message",
+		description: "Force-update status now",
 	},
 	{
 		name: "pin",
-		description: "Add embed message of server status and pin it",
+		description: "Post continuously updating message of server status and pin it",
 	},
 ]
 
