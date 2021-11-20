@@ -148,7 +148,7 @@ void (async () => {
 		let embed = new MessageEmbed()
 			.setAuthor(gameDisplayName)
 			.setColor(status.online ? "BLUE" : "RED")
-			.setFooter(`Last update: ${new Date().toISOString()}`)
+			.setFooter(`Last update: ${new Date().toISOString().replace("T", " ").substr(0, 19)} GMT`)
 
 		embed = embed.addFields({
 			name: "Status",
