@@ -8,11 +8,13 @@ import {
 	CommandInteraction,
 	GuildMember,
 } from "discord.js"
-import { format } from "date-fns-tz"
+import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz"
 import createLogFunc from "./log"
 import { loadConfig, loadPinData, savePinData } from "./configuration"
 import { fetchStatus, Status } from "./fetchStatus"
 import { registerCommands } from "./registerCommands"
+
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 void (async () => {
 	const client = new Client({
@@ -22,9 +24,7 @@ void (async () => {
 	if (!process.argv[2]) throw new Error("You must supply game name as argument")
 
 	const config = await loadConfig(process.argv[2])
-
 	const pinData = await loadPinData(config.game)
-
 	const gameDisplayName = config.game.charAt(0).toUpperCase() + config.game.slice(1)
 
 	const generateDisplayIp = () => {
@@ -144,14 +144,16 @@ void (async () => {
 	}
 
 	const createStatusEmbed = (status: Status) => {
+		const formattedTimeStamp = format(
+			utcToZonedTime(zonedTimeToUtc(new Date(), timeZone), config.timeZone),
+			"yyyy-MM-dd HH:mm:ss xxx",
+			{ timeZone: config.timeZone }
+		)
+
 		let embed = new MessageEmbed()
 			.setAuthor(gameDisplayName)
 			.setColor(status.online ? "BLUE" : "RED")
-			.setFooter(
-				`Last update: ${format(new Date(), "yyyy-MM-dd HH:mm:ss xxx", {
-					timeZone: config.timeZone,
-				})}`
-			)
+			.setFooter(`Last update: ${formattedTimeStamp}`)
 
 		embed = embed.addFields({
 			name: "Status",
