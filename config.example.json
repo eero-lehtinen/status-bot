@@ -1,0 +1,29 @@
+{
+	"nodePath": "node",
+	"gameConfigs": [
+		{
+			"game": "minecraft",
+			"host": "mc.eerolehtinen.fi",
+			"port": null,
+			"showMapField": false,
+			"showPlayerNames": true,
+			"logging": false,
+			"pinUpdateInterval": "2min",
+			"timeZone": "+02:00",
+			"appId": "APP_ID",
+			"token": "TOKEN"
+		},
+		{
+			"game": "valheim",
+			"host": "v.eerolehtinen.fi",
+			"port": null,
+			"showMapField": false,
+			"showPlayerNames": true,
+			"logging": false,
+			"pinUpdateInterval": "2min",
+			"timeZone": "+02:00",
+			"appId": "APP_ID",
+			"token": "TOKEN"
+		}
+	]
+}

@@ -16,16 +16,12 @@ export const commands = [
 	},
 ]
 
-const APP_ID = process.env.APP_ID as string
-const TOKEN = process.env.TOKEN as string
-
-const rest = new REST({ version: "9" }).setToken(TOKEN)
-
-export const registerCommands = async () => {
+export const registerCommands = async (token: string, appId: string) => {
+	const rest = new REST({ version: "9" }).setToken(token)
 	try {
 		console.log("Started refreshing application (/) commands.")
 
-		await rest.put(Routes.applicationCommands(APP_ID), { body: commands })
+		await rest.put(Routes.applicationCommands(appId), { body: commands })
 
 		//await rest.put(Routes.applicationGuildCommands(APP_ID, GUILD_ID), { body: {} })
 

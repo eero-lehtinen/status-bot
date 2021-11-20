@@ -1,5 +1,5 @@
 node_modules
 .env
-config.toml
+config.json
 out
 pinData.json

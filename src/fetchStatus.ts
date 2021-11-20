@@ -15,12 +15,11 @@ export type Status =
 export const fetchStatus = async (
 	game: string,
 	host: string,
-	port: string
+	port: number | null
 ): Promise<Status> => {
-	const portNum = port === "" ? undefined : parseInt(port, 10)
 	const g = game as QueryOptions["type"]
 	try {
-		const res = await gamedig.query({ type: g, host: host, port: portNum })
+		const res = await gamedig.query({ type: g, host: host, port: port ?? undefined })
 		return {
 			online: true,
 			info: {

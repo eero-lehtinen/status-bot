@@ -14,26 +14,24 @@ import { loadConfig, loadPinData, savePinData } from "./configuration"
 import { fetchStatus, Status } from "./fetchStatus"
 import { registerCommands } from "./registerCommands"
 
-void registerCommands()
-
 void (async () => {
 	const client = new Client({
 		intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
 	})
 
-	const config = await loadConfig()
+	if (!process.argv[2]) throw new Error("You must supply game name as argument")
 
-	const pinData = await loadPinData()
+	const config = await loadConfig(process.argv[2])
+
+	const pinData = await loadPinData(config.game)
 
 	const gameDisplayName = config.game.charAt(0).toUpperCase() + config.game.slice(1)
 
 	const generateDisplayIp = () => {
-		const portString = config.gamePort === "" ? "" : `:${config.gamePort}`
-		return `\`${config.gameHost}${portString}\``
+		const portString = !config.port ? "" : `:${config.port}`
+		return `\`${config.host}${portString}\``
 	}
 	const gameDisplayIp = generateDisplayIp()
-
-	const TOKEN = process.env.TOKEN as string
 
 	const log = createLogFunc(config.logging)
 
@@ -58,7 +56,7 @@ void (async () => {
 
 	const updateStatus = async () => {
 		log("Updating bot status")
-		const status = await fetchStatus(config.game, config.gameHost, config.gamePort)
+		const status = await fetchStatus(config.game, config.host, config.port)
 		await updatePresence(status)
 		await updatePin(status)
 		log(`Minecraft server online: ${status.online}`)
@@ -201,7 +199,7 @@ void (async () => {
 			const channel = await fetchChannel(interaction.guildId, interaction.channelId)
 			if (!channel) throw new Error("Could not fetch interaction channel")
 
-			const status = await fetchStatus(config.game, config.gameHost, config.gamePort)
+			const status = await fetchStatus(config.game, config.host, config.port)
 			const embed = createStatusEmbed(status)
 			const msg = await channel.send({ embeds: [embed] })
 
@@ -234,7 +232,7 @@ void (async () => {
 			pinData.channelId = pinnedMsg.channel.id
 			pinData.id = pinnedMsg.id
 
-			await savePinData(pinData)
+			await savePinData(pinData, config.game)
 
 			await interaction.editReply({
 				content: `Status embed created${oldPinRemoved ? " and previous pin removed" : ""}`,
@@ -275,5 +273,7 @@ void (async () => {
 		}
 	})
 
-	client.login(TOKEN)
+	client.login(config.token)
+
+	await registerCommands(config.token, config.appId)
 })()
