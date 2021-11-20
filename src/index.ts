@@ -63,16 +63,15 @@ void (async () => {
 		log(`Minecraft server online: ${status.online}`)
 	}
 
-	const fetchPinnedMessage = async (
-		guildId: string | null,
-		channelId: string | null,
-		messageId: string | null
-	) => {
-		if (!messageId || !guildId || !channelId) return null
+	const fetchChannel = async (guildId: string | null, channelId: string | null) => {
+		if (!guildId || !channelId) return null
 
-		const guild = client.guilds.cache.get(guildId)
+		let guild = client.guilds.cache.get(guildId)
 		if (!guild) {
-			log(`Unable to find pin guild.`)
+			guild = await client.guilds.fetch(guildId)
+		}
+		if (!guild) {
+			log(`Unable to find guild with id ${guildId}`)
 			return null
 		}
 
@@ -81,9 +80,21 @@ void (async () => {
 			channel = (await guild.channels.fetch(channelId)) as TextChannel
 		}
 		if (!channel) {
-			log(`Unable to find pin channel.`)
+			log(`Unable to find channel with id ${channelId}`)
 			return null
 		}
+
+		return channel
+	}
+
+	const fetchPinnedMessage = async (
+		guildId: string | null,
+		channelId: string | null,
+		messageId: string | null
+	) => {
+		const channel = await fetchChannel(guildId, channelId)
+
+		if (!messageId || !channel) return null
 
 		const messages = await channel.messages.fetchPinned()
 		const message = messages.get(messageId)
@@ -182,14 +193,11 @@ void (async () => {
 		try {
 			await interaction.reply({ content: "Creating status embed..." })
 
+			const channel = await fetchChannel(interaction.guildId, interaction.channelId)
+			if (!channel) throw new Error("Could not fetch interaction channel")
+
 			const status = await fetchStatus(config.game, config.gameHost, config.gamePort)
-
 			const embed = createStatusEmbed(status)
-
-			const channel = (await interaction.guild?.channels.fetch(
-				interaction.channelId
-			)) as TextChannel
-
 			const msg = await channel.send({ embeds: [embed] })
 
 			const pinnedMsg = await msg.pin()
