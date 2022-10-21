@@ -1,12 +1,12 @@
 import ms from "ms"
 import {
 	Client,
-	Intents,
-	MessageEmbed,
+	GatewayIntentBits,
+	EmbedBuilder,
 	TextChannel,
-	Message,
 	CommandInteraction,
-	GuildMember,
+	ActivityType,
+	PermissionFlagsBits,
 } from "discord.js"
 import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz"
 import createLogFunc from "./log"
@@ -18,7 +18,7 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 void (async () => {
 	const client = new Client({
-		intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+		intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages],
 	})
 
 	if (!process.argv[2]) throw new Error("You must supply game name as argument")
@@ -46,7 +46,7 @@ void (async () => {
 		client.user?.setPresence({
 			activities: [
 				{
-					type: "WATCHING",
+					type: ActivityType.Watching,
 					name: `${gameDisplayName}${infoText}`,
 				},
 			],
@@ -150,10 +150,10 @@ void (async () => {
 			{ timeZone: config.timeZone }
 		)
 
-		let embed = new MessageEmbed()
-			.setAuthor(gameDisplayName)
-			.setColor(status.online ? "BLUE" : "RED")
-			.setFooter(`Last update: ${formattedTimeStamp}`)
+		let embed = new EmbedBuilder()
+			.setAuthor({ name: gameDisplayName })
+			.setColor(status.online ? "Blue" : "Red")
+			.setFooter({ text: `Last update: ${formattedTimeStamp}` })
 
 		embed = embed.addFields({
 			name: "Status",
@@ -261,7 +261,7 @@ void (async () => {
 			return
 		}
 
-		if (!interaction.memberPermissions?.has("MANAGE_MESSAGES")) {
+		if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
 			await interaction.reply({
 				content: "Failed: You don't have the `manage messages` permission",
 			})
