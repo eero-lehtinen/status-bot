@@ -52,14 +52,20 @@ void (async () => {
 			],
 			status: status.online ? "online" : "idle",
 		})
+
+		log(
+			`Set presence to ${gameDisplayName}${infoText} and status to ${
+				status.online ? "online" : "idle"
+			}`
+		)
 	}
 
 	const updateStatus = async () => {
 		log("Updating bot status")
 		const status = await fetchStatus(config.game, config.host, config.port)
+		log(`${gameDisplayName} server online: ${status.online}`)
 		await updatePresence(status)
 		await updatePin(status)
-		log(`${gameDisplayName} server online: ${status.online}`)
 	}
 
 	const fetchChannel = async (guildId: string | null, channelId: string | null) => {
