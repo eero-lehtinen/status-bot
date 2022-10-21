@@ -43,7 +43,7 @@ void (async () => {
 			infoText = " | Offline"
 		}
 
-		client.user?.setPresence({
+		client.user!.setPresence({
 			activities: [
 				{
 					type: ActivityType.Watching,
@@ -246,7 +246,7 @@ void (async () => {
 	}
 
 	client.on("ready", () => {
-		console.log(`Ready. Logged as ${client.user?.tag}.`)
+		console.log(`Ready. Logged as ${client.user!.tag}.`)
 		updateStatus()
 		setInterval(() => {
 			updateStatus()
