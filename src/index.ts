@@ -59,7 +59,7 @@ void (async () => {
 		const status = await fetchStatus(config.game, config.host, config.port)
 		await updatePresence(status)
 		await updatePin(status)
-		log(`Minecraft server online: ${status.online}`)
+		log(`${gameDisplayName} server online: ${status.online}`)
 	}
 
 	const fetchChannel = async (guildId: string | null, channelId: string | null) => {
