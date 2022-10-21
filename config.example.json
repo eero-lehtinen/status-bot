@@ -9,7 +9,7 @@
 			"showPlayerNames": true,
 			"logging": false,
 			"pinUpdateInterval": "2min",
-			"timeZone": "+02:00",
+			"timeZone": "Europe/Helsinki",
 			"appId": "APP_ID",
 			"token": "TOKEN"
 		},
@@ -21,7 +21,7 @@
 			"showPlayerNames": true,
 			"logging": false,
 			"pinUpdateInterval": "2min",
-			"timeZone": "+02:00",
+			"timeZone": "Europe/Helsinki",
 			"appId": "APP_ID",
 			"token": "TOKEN"
 		}
