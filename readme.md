@@ -3,7 +3,7 @@
 ## Requirements
 
 - Node.js 16 or higher
-- PM2
+- [PM2](https://pm2.keymetrics.io/) (for running multiple bots at once)
   
 ## Usage
 ```sh
