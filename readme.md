@@ -1,5 +1,7 @@
 # Game Status Bot for Discord
 
+Shows if a game server is online and how many people are connected to it. Some games also allow you to see the names of the connected players.
+
 ## Requirements
 
 - Node.js 16 or higher
